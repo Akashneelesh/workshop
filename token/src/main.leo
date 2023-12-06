@@ -13,6 +13,20 @@ program token.aleo {
 
     /* Mint */
 
+    transition burn_public(public amount: u64) {
+        // Burn the tokens publicly by invoking the computation on-chain.
+        return then finalize(self.caller, amount);
+    } 
+
+    finalize burn_public(public sender: address, public amount: u64) {
+        // Decrements `account[sender]` by `amount`.
+        // If `account[sender]` does not exist, it will be created.
+        // If `account[sender] - amount` underflows, `burn_public` is reverted.
+        let sender_amount: u64 = Mapping::get_or_use(account, sender, 0u64);
+  
+        Mapping::set(account, sender, sender_amount - amount);
+    }
+
     // The function `mint_public` issues the specified token amount for the token receiver publicly on the network.
     transition mint_public(public receiver: address, public amount: u64) {
         // Mint the tokens publicly by invoking the computation on-chain.
